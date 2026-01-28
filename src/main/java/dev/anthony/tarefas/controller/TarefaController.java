@@ -1,6 +1,8 @@
 package dev.anthony.tarefas.controller;
 
 import dev.anthony.tarefas.custom_messages.ErrorMessage;
+import dev.anthony.tarefas.dto.tarefa.TarefaRequestDTO;
+import dev.anthony.tarefas.dto.tarefa.TarefaResponseDTO;
 import dev.anthony.tarefas.model.Tarefa;
 import dev.anthony.tarefas.service.TarefaService;
 import lombok.AllArgsConstructor;
@@ -18,32 +20,47 @@ public class TarefaController {
     private final TarefaService tarefaService;
 
     @GetMapping
-    public ResponseEntity<List<Tarefa>> findAll() {
-        return ResponseEntity.ok(tarefaService.findAll());
+    public ResponseEntity<List<TarefaResponseDTO>> findAll() {
+        return ResponseEntity
+                .ok(tarefaService.findAll()
+                .stream()
+                .map(this::toDTO)
+                .toList()); // 200
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> findById(@PathVariable UUID id) {
         try {
             var tarefa = tarefaService.findById(id);
-            return ResponseEntity.ok(tarefa); // 200
+            return ResponseEntity
+                    .ok(toDTO(tarefa)); // 200
         }
         catch(RuntimeException e) {
             var errorMessage = new ErrorMessage(e.getMessage(), "NOT_FOUND");
-            return ResponseEntity.status(404).body(errorMessage); // 404
+            return ResponseEntity
+                    .status(404)
+                    .body(errorMessage); // 404
         }
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody Tarefa tarefa) {
+    public ResponseEntity<?> create(@RequestBody TarefaRequestDTO dto) {
+
+        var tarefa = new Tarefa ();
+        tarefa.setTitulo(dto.titulo());
+        tarefa.setDescricao(dto.descricao());
 
         try {
             var result = tarefaService.create(tarefa);
-            return ResponseEntity.ok(result); // 200
+            return ResponseEntity
+                    .status(201)
+                    .body(toDTO(result)); // 201
         }
         catch(IllegalArgumentException e) {
             var errorMessage = new ErrorMessage(e.getMessage(), "INVALID_INPUT");
-            return ResponseEntity.badRequest().body(errorMessage); // 400
+            return ResponseEntity
+                    .status(400)
+                    .body(errorMessage); // 400
         }
     }
 
@@ -51,31 +68,58 @@ public class TarefaController {
     public ResponseEntity<Void> deleteById(@PathVariable UUID id) {
         try {
             tarefaService.deleteById(id);
-            return ResponseEntity.noContent().build(); // 204
+            return ResponseEntity
+                    .status(204)
+                    .build(); // 204
         }
         catch (RuntimeException e) {
-            return ResponseEntity.notFound().build(); // 404
+            return ResponseEntity
+                    .status(404)
+                    .build(); // 404
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Tarefa> update(@PathVariable UUID id, @RequestBody Tarefa dadosAtualizados) {
+    public ResponseEntity<TarefaResponseDTO> update(@PathVariable UUID id, @RequestBody TarefaRequestDTO dto) {
+
+        var dadosAtualizados = new Tarefa();
+        dadosAtualizados.setTitulo(dto.titulo());
+        dadosAtualizados.setDescricao(dto.descricao());
+
         try {
-            return ResponseEntity.ok(tarefaService.update(id, dadosAtualizados));
+            var updatedTarefa = tarefaService.update(id, dadosAtualizados);
+            return ResponseEntity
+                    .ok(toDTO(updatedTarefa));
         }
         catch (RuntimeException e) {
-            return ResponseEntity.notFound().build(); // 404
+            return ResponseEntity
+                    .status(404)
+                    .build(); // 404
         }
     }
 
     @PatchMapping("/{id}/completed")
     public ResponseEntity<?> completed(@PathVariable UUID id) {
         try {
-            return ResponseEntity.ok(tarefaService.completed(id));
+            var completedTarefa = tarefaService.completed(id);
+            return ResponseEntity
+                    .ok(toDTO(completedTarefa)); // 200
         }
         catch (RuntimeException e) {
             var errorMessage = new ErrorMessage(e.getMessage(), "NOT_FOUND");
-            return ResponseEntity.status(404).body(errorMessage); // 404
+            return ResponseEntity
+                    .status(404)
+                    .body(errorMessage); // 404
         }
+    }
+
+    private TarefaResponseDTO toDTO(Tarefa tarefa) {
+        return new TarefaResponseDTO(
+                tarefa.getId(),
+                tarefa.getTitulo(),
+                tarefa.getDescricao(),
+                tarefa.getConcluida(),
+                tarefa.getCriadaEm()
+        );
     }
 }
