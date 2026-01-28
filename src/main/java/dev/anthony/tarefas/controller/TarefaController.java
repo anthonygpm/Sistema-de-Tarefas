@@ -30,17 +30,7 @@ public class TarefaController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> findById(@PathVariable UUID id) {
-        try {
-            var tarefa = tarefaService.findById(id);
-            return ResponseEntity
-                    .ok(toDTO(tarefa)); // 200
-        }
-        catch(RuntimeException e) {
-            var errorMessage = new ErrorMessage(e.getMessage(), "NOT_FOUND");
-            return ResponseEntity
-                    .status(404)
-                    .body(errorMessage); // 404
-        }
+            return ResponseEntity.ok(toDTO(tarefaService.findById(id))); // 200
     }
 
     @PostMapping
@@ -50,33 +40,10 @@ public class TarefaController {
         tarefa.setTitulo(dto.titulo());
         tarefa.setDescricao(dto.descricao());
 
-        try {
-            var result = tarefaService.create(tarefa);
-            return ResponseEntity
-                    .status(201)
-                    .body(toDTO(result)); // 201
-        }
-        catch(IllegalArgumentException e) {
-            var errorMessage = new ErrorMessage(e.getMessage(), "INVALID_INPUT");
-            return ResponseEntity
-                    .status(400)
-                    .body(errorMessage); // 400
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable UUID id) {
-        try {
-            tarefaService.deleteById(id);
-            return ResponseEntity
-                    .status(204)
-                    .build(); // 204
-        }
-        catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(404)
-                    .build(); // 404
-        }
+        var result = tarefaService.create(tarefa);
+        return ResponseEntity
+                .status(201)
+                .body(toDTO(result)); // 201
     }
 
     @PutMapping("/{id}")
@@ -86,31 +53,23 @@ public class TarefaController {
         dadosAtualizados.setTitulo(dto.titulo());
         dadosAtualizados.setDescricao(dto.descricao());
 
-        try {
-            var updatedTarefa = tarefaService.update(id, dadosAtualizados);
-            return ResponseEntity
-                    .ok(toDTO(updatedTarefa));
-        }
-        catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(404)
-                    .build(); // 404
-        }
+        var updatedTarefa = tarefaService.update(id, dadosAtualizados);
+        return ResponseEntity.ok(toDTO(updatedTarefa));
     }
 
     @PatchMapping("/{id}/completed")
     public ResponseEntity<?> completed(@PathVariable UUID id) {
-        try {
-            var completedTarefa = tarefaService.completed(id);
-            return ResponseEntity
-                    .ok(toDTO(completedTarefa)); // 200
-        }
-        catch (RuntimeException e) {
-            var errorMessage = new ErrorMessage(e.getMessage(), "NOT_FOUND");
-            return ResponseEntity
-                    .status(404)
-                    .body(errorMessage); // 404
-        }
+        var completedTarefa = tarefaService.completed(id);
+        return ResponseEntity
+                .ok(toDTO(completedTarefa)); // 200
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteById(@PathVariable UUID id) {
+        tarefaService.deleteById(id);
+        return ResponseEntity
+                .status(204)
+                .build(); // 204
     }
 
     private TarefaResponseDTO toDTO(Tarefa tarefa) {

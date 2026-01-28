@@ -1,5 +1,7 @@
 package dev.anthony.tarefas.service;
 
+import dev.anthony.tarefas.exception.BadRequestException;
+import dev.anthony.tarefas.exception.ResourceNotFoundException;
 import dev.anthony.tarefas.model.Tarefa;
 import dev.anthony.tarefas.repository.TarefaRepository;
 import lombok.AllArgsConstructor;
@@ -20,12 +22,12 @@ public class TarefaService {
 
     public Tarefa findById(UUID id) {
         return tarefaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada."));
+                .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada."));
     }
 
     public Tarefa create(Tarefa tarefa) {
         if (tarefa.getTitulo() == null || tarefa.getTitulo().isBlank()) {
-            throw new IllegalArgumentException("Título é obrigatório.");
+            throw new BadRequestException("Título é obrigatório.");
         }
 
         return tarefaRepository.save(tarefa);
@@ -34,16 +36,14 @@ public class TarefaService {
     public void deleteById(UUID id) {
 
         if (!tarefaRepository.existsById(id)) {
-            throw new RuntimeException("Tarefa não encontrada.");
+            throw new ResourceNotFoundException("Tarefa não encontrada.");
         }
 
         tarefaRepository.deleteById(id);
     }
 
     public Tarefa update(UUID id, Tarefa dadosAtualizados) {
-        Tarefa tarefa = tarefaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada."));
-
+        Tarefa tarefa = findById(id);
         tarefa.setTitulo(dadosAtualizados.getTitulo());
         tarefa.setDescricao(dadosAtualizados.getDescricao());
 
@@ -51,11 +51,8 @@ public class TarefaService {
     }
 
     public Tarefa completed(UUID id) {
-        Tarefa tarefa = tarefaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada."));
-
+        Tarefa tarefa = findById(id);
         tarefa.setConcluida(true);
-
         return tarefaRepository.save(tarefa);
     }
 
