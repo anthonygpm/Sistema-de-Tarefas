@@ -5,6 +5,7 @@ import dev.anthony.tarefas.dto.tarefa.TarefaRequestDTO;
 import dev.anthony.tarefas.dto.tarefa.TarefaResponseDTO;
 import dev.anthony.tarefas.model.Tarefa;
 import dev.anthony.tarefas.service.TarefaService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +35,7 @@ public class TarefaController {
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody TarefaRequestDTO dto) {
+    public ResponseEntity<?> create(@RequestBody @Valid TarefaRequestDTO dto) {
 
         var tarefa = new Tarefa ();
         tarefa.setTitulo(dto.titulo());
@@ -47,7 +48,7 @@ public class TarefaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TarefaResponseDTO> update(@PathVariable UUID id, @RequestBody TarefaRequestDTO dto) {
+    public ResponseEntity<TarefaResponseDTO> update(@PathVariable UUID id, @RequestBody @Valid TarefaRequestDTO dto) {
 
         var dadosAtualizados = new Tarefa();
         dadosAtualizados.setTitulo(dto.titulo());

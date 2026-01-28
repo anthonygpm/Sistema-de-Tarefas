@@ -26,10 +26,6 @@ public class TarefaService {
     }
 
     public Tarefa create(Tarefa tarefa) {
-        if (tarefa.getTitulo() == null || tarefa.getTitulo().isBlank()) {
-            throw new BadRequestException("Título é obrigatório.");
-        }
-
         return tarefaRepository.save(tarefa);
     }
 

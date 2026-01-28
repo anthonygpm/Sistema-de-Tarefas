@@ -2,6 +2,7 @@ package dev.anthony.tarefas.exception;
 
 import dev.anthony.tarefas.custom_messages.ErrorMessage;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -20,6 +21,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(400)
                 .body(new ErrorMessage(ex.getMessage(), "BAD_REQUEST"));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorMessage> handleValidationError(
+            MethodArgumentNotValidException ex
+    ) {
+        String message = ex.getBindingResult()
+                .getFieldErrors()
+                .get(0)
+                .getDefaultMessage();
+
+        return ResponseEntity
+                .status(400)
+                .body(new ErrorMessage(message, "VALIDATION_ERROR"));
     }
 
     @ExceptionHandler(Exception.class)
