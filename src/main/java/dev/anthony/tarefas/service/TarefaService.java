@@ -1,0 +1,62 @@
+package dev.anthony.tarefas.service;
+
+import dev.anthony.tarefas.model.Tarefa;
+import dev.anthony.tarefas.repository.TarefaRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@AllArgsConstructor
+public class TarefaService {
+
+    private final TarefaRepository tarefaRepository;
+
+    public List<Tarefa> findAll() {
+        return tarefaRepository.findAll();
+    }
+
+    public Tarefa findById(UUID id) {
+        return tarefaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada."));
+    }
+
+    public Tarefa create(Tarefa tarefa) {
+        if (tarefa.getTitulo() == null || tarefa.getTitulo().isBlank()) {
+            throw new IllegalArgumentException("Título é obrigatório.");
+        }
+
+        return tarefaRepository.save(tarefa);
+    }
+
+    public void deleteById(UUID id) {
+
+        if (!tarefaRepository.existsById(id)) {
+            throw new RuntimeException("Tarefa não encontrada.");
+        }
+
+        tarefaRepository.deleteById(id);
+    }
+
+    public Tarefa update(UUID id, Tarefa dadosAtualizados) {
+        Tarefa tarefa = tarefaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada."));
+
+        tarefa.setTitulo(dadosAtualizados.getTitulo());
+        tarefa.setDescricao(dadosAtualizados.getDescricao());
+
+        return tarefaRepository.save(tarefa);
+    }
+
+    public Tarefa completed(UUID id) {
+        Tarefa tarefa = tarefaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada."));
+
+        tarefa.setConcluida(true);
+
+        return tarefaRepository.save(tarefa);
+    }
+
+}
