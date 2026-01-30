@@ -135,7 +135,10 @@ public class TarefaController {
 
 
     @PatchMapping("/{id}/completed")
-    @Operation(summary = "Completar tarefa")
+    @Operation(
+            summary = "Completar tarefa",
+            description = "Marca a tarefa como concluída. Não requer corpo na requisição."
+    )
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
